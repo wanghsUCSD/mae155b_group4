@@ -1,0 +1,44 @@
+environment:
+  matrix:
+  - TOXENV: py36
+  - TOXENV: py37
+
+build: off
+
+install:
+- pip install tox
+
+test_script:
+- tox 
+
+
+############################## EXPLANATION #####################################
+
+Okay so this is the explanation of the YAML (yml) that is used for appveyor. This is a text document with the 
+lines of code that you need to include in your appveyor.yml file. In the file above, TOXENV defines the enviroment that
+your code will be run in. In this case, I have it setup to run in python 3.6 and python 3.7. 
+
+Essentially you will copy and paste this file, and title it: appveyor.yml
+
+If you dont want to test it in both python 3.6 and python 3.7 you can just remove py36 or py37. 
+
+TOX:
+
+Is a generic virtualenv management and test command line tool you can use for:
+
+	- checking your package installs correctly with different Python versions and interpreters
+
+	- running your tests in each of the environments, configuring your test tool of choice
+
+	- acting as a frontend to Continuous Integration servers, 
+	- greatly reducing boilerplate and merging CI and shell-based testing.
+
+Basically tox creates a virtual enviroment so that appveyor can test your code in that enviroment. 
+
+IMPORTANT: Make sure that the identation is  kept the way it is in the example above. If the indentation\
+	   is off, then it will not run properly. So just copy and paste.
+
+
+
+
+
