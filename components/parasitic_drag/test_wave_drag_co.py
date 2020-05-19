@@ -1,6 +1,6 @@
 import unittest
 
-from parasitic_drag.wave_drag_co import WaveDragCo
+from .wave_drag_co import WaveDragCo
 
 from openmdao.api import Problem
 

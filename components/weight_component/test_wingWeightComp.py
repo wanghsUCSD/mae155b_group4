@@ -1,6 +1,6 @@
 import unittest
 
-from wingWeight import wingWeightComp
+from .wingWeight import wingWeightComp
 from openmdao.api import Problem
 from openmdao.utils.assert_utils import assert_check_partials
 
