@@ -1,6 +1,6 @@
+-e git+https://github.com/numpy/numpy#egg=numpy
 -e git+https://github.com/OpenMDAO/OpenMDAO.git#egg=OpenMDAO
 -e git+https://github.com/mdolab/OpenAeroStruct#egg=OpenAeroStruct
--e git+https://github.com/numpy/numpy#egg=numpy
 nose
 
 
