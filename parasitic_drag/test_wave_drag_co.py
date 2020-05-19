@@ -1,15 +1,17 @@
 import unittest
 
-from simple_optimization.components.cl_comp import CLComp
+from parasitic_drag.wave_drag_co import WaveDragCo
+
 from openmdao.api import Problem
+
 from openmdao.utils.assert_utils import assert_check_partials
 
 
-class TestCLComp(unittest.TestCase):
+class TestWaveDragCo(unittest.TestCase):
 
     def test_component_and_derivatives(self):
         prob = Problem()
-        prob.model = CLComp()
+        prob.model = WaveDragCo()
         prob.setup()
         prob.run_model()
 
