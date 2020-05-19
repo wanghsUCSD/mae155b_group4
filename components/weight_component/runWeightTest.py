@@ -2,7 +2,7 @@
 
 import numpy as np
 from openmdao.api import Problem, Group, IndepVarComp, ExecComp, ScipyOptimizeDriver
-from weight_component.wingWeight import wingWeightComp
+from wingWeight import wingWeightComp
 
 
 prob = Problem()

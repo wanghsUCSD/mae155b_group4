@@ -2,10 +2,10 @@ from distutils.core import setup
 
 
 setup(
-    name='simple_optimization',
+    name='mae155b_group4',
     version='1',
     packages=[
-        'simple_optimization',
+        'mae155b_group4',
     ],
     install_requires=[
     ],

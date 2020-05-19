@@ -9,10 +9,11 @@ from openmdao.api import ExplicitComponent
 
 class WaveDragCo(ExplicitComponent):
 
-    def array_setup(self):
+    def setup(self):
         self.add_input('mach_number')
         self.add_input('critical_mach_number')
         self.add_output('wave_drag_co')
+        self.add_output('wave_drag_coeff')
 
         self.declare_partials('wave_drag_co', 'mach_number')
         self.declare_partials('wave_drag_co', 'critical_mach_number')
