@@ -1,4 +1,3 @@
--e git+https://github.com/numpy/numpy.git#egg=numpy
 -e git+https://github.com/OpenMDAO/OpenMDAO.git#egg=OpenMDAO
 
 nose
