@@ -1,18 +1,18 @@
 import unittest
 
-from .wave_drag_co import WaveDragCo
+from .form_drag_co import FormDragCo
 
 from openmdao.api import Problem
 
 from openmdao.utils.assert_utils import assert_check_partials
 
-#  test for wave drag coefficient component
+#  test for Form Factor
 
-class TestWaveDragCo(unittest.TestCase):
+class TestFormDragCo(unittest.TestCase):
 
     def test_component_and_derivatives(self):
         prob = Problem()
-        prob.model = WaveDragCo()
+        prob.model = FormDragCo()
         prob.setup()
         prob.run_model()
 
