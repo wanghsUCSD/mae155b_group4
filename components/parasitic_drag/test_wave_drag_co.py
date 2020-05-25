@@ -1,15 +1,17 @@
 import unittest
 
-from simple_optimization.components.cdi_comp import CDiComp
+from .wave_drag_co import WaveDragCo
+
 from openmdao.api import Problem
+
 from openmdao.utils.assert_utils import assert_check_partials
 
 
-class TestCDiComp(unittest.TestCase):
+class TestWaveDragCo(unittest.TestCase):
 
     def test_component_and_derivatives(self):
         prob = Problem()
-        prob.model = CDiComp(e=0.5)
+        prob.model = WaveDragCo()
         prob.setup()
         prob.run_model()
 
@@ -19,3 +21,5 @@ class TestCDiComp(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+    #test line
