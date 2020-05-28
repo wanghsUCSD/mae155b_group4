@@ -6,6 +6,7 @@ from openmdao.api import Problem
 
 from openmdao.utils.assert_utils import assert_check_partials
 
+#  test for wave drag coefficient component
 
 class TestWaveDragCo(unittest.TestCase):
 
