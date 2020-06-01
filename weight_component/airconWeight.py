@@ -3,7 +3,7 @@ import numpy as np
 from openmdao.api import ExplicitComponent
 
 
-class maingearWeightComp(ExplicitComponent):
+class airconWeightComp(ExplicitComponent):
 
     def initialize(self):
         self.options.declare('Np', types=float)
