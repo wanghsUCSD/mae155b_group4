@@ -111,10 +111,16 @@ prob.setup()
 # exit()
 prob.run_driver()
 
+print('CD')
 print(prob['aero_point_0.wing_perf.CD'][0])
-
+print('CL')
 print(prob['aero_point_0.wing_perf.CL'][0])
-
+print('CM')
 print(prob['aero_point_0.CM'][1])
+
+CL = prob['aero_point_0.wing_perf.CL'][0]
+
+print('L/D')
+print(prob['aero_point_0.CL'][0] / prob['aero_point_0.wing_perf.CD'][0])
 
 # balls
