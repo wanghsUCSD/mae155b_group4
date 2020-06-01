@@ -3,10 +3,10 @@ from distutils.core import setup
 
 
 setup(
-    name='weight_component',
+    name='components',
     version='1',
     packages=[
-        'weight_component',
+        'components',
     ],
     install_requires=[
     ],

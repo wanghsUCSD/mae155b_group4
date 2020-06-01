@@ -1,97 +1,106 @@
-# maximize L/D
-# w.r.t. alpha
-# s.t. CL >= CL*
-
-# Model inputs: alpha, CL0, CD0, AR
-# Model outputs: (L/D), CL
-
-# Models:
-# Component 1: alpha, CL0, CD0, AR
-# Component 2: CL = CLa * alpha + CL0
-# Component 3: CDi = CL^2 / (pi e AR)
-# Component 4: CD = CD0 + CDi
-# Component 5: L/D = CL/CD
-
 import numpy as np
-from openmdao.api import Problem, Group, IndepVarComp, ExecComp, ScipyOptimizeDriver
-from simple_optimization.components.cl_comp import CLComp
-from simple_optimization.components.cdi_comp import CDiComp
 
+from openmdao.api import Problem, Group, IndepVarComp, ExecComp, ScipyOptimizeDriver
+from openaerostruct.geometry.utils import generate_mesh
+from components.oas_group import OASGroup
+from components.breguet_range.breguet_range_comp import BregRangeCo
+
+# Create a dictionary to store options about the mesh
+mesh_dict = {'num_y' : 11,
+             'num_x' : 5,
+             'wing_type' : 'CRM',
+             'symmetry' : False,
+             'num_twist_cp' : 3}
+
+# Generate the aerodynamic mesh based on the previous dictionary
+mesh, twist_cp = generate_mesh(mesh_dict)
+
+# Create a dictionary with info and options about the aerodynamic
+# lifting surface
+surface = {
+            # Wing definition
+            'name' : 'wing',        # name of the surface
+            'symmetry' : False,     # if true, model one half of wing
+                                    # reflected across the plane y = 0
+            'S_ref_type' : 'wetted', # how we compute the wing area,
+                                     # can be 'wetted' or 'projected'
+            'fem_model_type' : 'tube',
+
+            'twist_cp' : twist_cp,
+            'mesh' : mesh,
+
+            # Aerodynamic performance of the lifting surface at
+            # an angle of attack of 0 (alpha=0).
+            # These CL0 and CD0 values are added to the CL and CD
+            # obtained from aerodynamic analysis of the surface to get
+            # the total CL and CD.
+            # These CL0 and CD0 values do not vary wrt alpha.
+            'CL0' : 0.2,            # CL of the surface at alpha=0
+            'CD0' : 0.024,            # CD of the surface at alpha=0
+
+            # Airfoil properties for viscous drag calculation
+            'k_lam' : 0.05,         # percentage of chord with laminar
+                                    # flow, used for viscous drag
+            't_over_c_cp' : np.array([0.14]),      # thickness over chord ratio (NACA0015)
+            'c_max_t' : .303,       # chordwise location of maximum (NACA0015)
+                                    # thickness
+            'with_viscous' : True,  # if true, compute viscous drag
+            'with_wave' : False,     # if true, compute wave drag
+            }
+
+# Create the OpenMDAO problem
 prob = Problem()
 
 model = Group()
 
 comp = IndepVarComp()
-comp.add_output('alpha', val=0.04)
-comp.add_output('CLa', val=2 * np.pi)
-comp.add_output('CL0', val=0.2)
-comp.add_output('CD0', val=0.015)
-comp.add_output('AR', val=8.)
-comp.add_design_var('alpha', lower=0.)
-model.add_subsystem('inputs_comp', comp, promotes=['*'])
+comp.add_output('flight_speed', val=257.22)
+comp.add_output('R', val=1.3e6)
+comp.add_output('isp', val=6000)
+prob.model.add_subsystem('inputs_comp', comp, promotes=['*'])
 
+comp = BregRangeCo()
+prob.model.add_subsystem('breguet_range_comp', comp, promotes=['*'])
 
-comp = CLComp()
-model.add_subsystem('cl_comp', comp, promotes=['*'])
-
-comp = CDiComp(e=0.7)
-model.add_subsystem('cdi_comp', comp, promotes=['*'])
-
-comp = ExecComp('CD = CD0 + CDi')
-model.add_subsystem('cd_comp', comp, promotes=['*'])
+oas_group = OASGroup(surface=surface)
+prob.model.add_subsystem('oas_group', oas_group, promotes=['*'])
 
 comp = ExecComp('LD = CL/CD')
-comp.add_objective('LD', scaler=-1.)
-model.add_subsystem('ld_comp', comp, promotes=['*'])
+prob.model.add_subsystem('ld_comp', comp, promotes=['*'])
 
-prob.model = model
+prob.model.connect('aero_point_0.CL', 'CL')
+prob.model.connect('aero_point_0.CD', 'CD')
 
-prob.driver = ScipyOptimizeDriver()
-prob.driver.options['optimizer'] = 'SLSQP'
-prob.driver.options['tol'] = 1e-15
-prob.driver.options['disp'] = True
+# Import the Scipy Optimizer and set the driver of the problem to use
+# it, which defaults to an SLSQP optimization method
+# prob.driver = om.ScipyOptimizeDriver()
+# prob.driver.options['tol'] = 1e-9
 
+# recorder = om.SqliteRecorder("aero.db")
+# prob.driver.add_recorder(recorder)
+# prob.driver.recording_options['record_derivatives'] = True
+# prob.driver.recording_options['includes'] = ['*']
+
+# Setup problem and add design variables, constraint, and objective
+#prob.model.add_design_var('wing.twist_cp', lower=-10., upper=15.)
+# prob.model.add_constraint(point_name + '.wing_perf.CL', equals=0.5)
+#prob.model.add_objective(point_name + '.wing_perf.CD', scaler=1e4)
+
+# Set up and run the optimization problem
 prob.setup()
+# prob.check_partials(compact_print=True)
+# exit()
+# prob.run_driver()
 prob.run_model()
-prob.run_driver()
 
-prob.check_partials(compact_print=True)
+prob.model.list_outputs(prom_name=True)
 
-print('alpha', prob['alpha'])
-print('CL0', prob['CL0'])
-print('CL', prob['CL'])
-print('CD0', prob['CD0'])
-print('CDi', prob['CDi'])
-print('CD', prob['CD'])
+print(prob['aero_point_0.wing_perf.CD'][0])
+
+print(prob['aero_point_0.wing_perf.CL'][0])
+
+print(prob['aero_point_0.CM'][1])
+
+print('w_frac', prob['w_frac'])
 print('LD', prob['LD'])
 
-# Visualization: ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- 
-
-alpha_opt = prob['alpha'][0]
-
-num = 100
-alpha_sweep = np.linspace(-0.1, 0.2, num)
-CL_list = np.empty(num)
-CD_list = np.empty(num)
-
-for ind in range(num):
-    prob['alpha'] = alpha_sweep[ind]
-    prob.run_model()
-    CL_list[ind] = prob['CL'][0]
-    CD_list[ind] = prob['CD'][0]
-
-prob['alpha'] = alpha_opt
-prob.run_model()
-CL_opt = prob['CL'][0]
-CD_opt = prob['CD'][0]
-
-import matplotlib.pyplot as plt
-
-plt.plot(
-    [0., CD_opt],
-    [0., CL_opt],
-)
-plt.plot(CD_list, CL_list)
-plt.xlabel('CD')
-plt.ylabel('CL')
-plt.show()
