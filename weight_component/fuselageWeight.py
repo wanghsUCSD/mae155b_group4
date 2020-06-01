@@ -9,13 +9,13 @@ class fuselageWeightComp(ExplicitComponent):
         self.options.declare('N', types=float)
         self.options.declare('L', types=float)
         self.options.declare('LD', types=float)
-        self.options.declare('Bw', types=float)
         self.options.declare('Sfuse', types=float)
         self.options.declare('sweep', types=float)
         self.options.declare('taper', types=float)
 
     def setup(self):
         self.add_input('W0')
+        self.add_input('Bw')
         self.add_output('Wfuse')
 
         self.declare_partials('Wfuse', 'W0')
@@ -24,12 +24,12 @@ class fuselageWeightComp(ExplicitComponent):
         N = self.options['N']
         L = self.options['L']
         LD = self.options['LD']
-        Bw = self.options['Bw']
         Sfuse = self.options['Sfuse']
         sweep = self.options['sweep']
         taper = self.options['taper']
 
         W0 = inputs['W0']
+        Bw = inputs['Bw']
 
         Kws = 0.75 * (1 + 2 * taper) / (1 + taper) * Bw * np.tan(sweep / L * (np.pi / 180))
 
@@ -39,12 +39,12 @@ class fuselageWeightComp(ExplicitComponent):
         N = self.options['N']
         L = self.options['L']
         LD = self.options['LD']
-        Bw = self.options['Bw']
         Sfuse = self.options['Sfuse']
         sweep = self.options['sweep']
         taper = self.options['taper']
 
         W0 = inputs['W0']
+        Bw = inputs['Bw']
 
         Kws = 0.75 * (1 + 2 * taper) / (1 + taper) * Bw * np.tan(sweep / L * (np.pi / 180))
 
