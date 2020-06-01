@@ -10,10 +10,10 @@ from openmdao.api import ExplicitComponent
 class BregRangeCo(ExplicitComponent):
 
     def setup(self):
-        self.add_input('flight_speed', val=257.222)
-        self.add_input('LD', val=14) #This is a dummy variable for LD
-        self.add_input('R', val=1.296e6)
-        self.add_input('isp', val=3000) #This is a dummy variable for ISP
+        self.add_input('flight_speed')
+        self.add_input('LD')
+        self.add_input('R')
+        self.add_input('isp') #This is a dummy variable for ISP
         self.add_output('w_frac')
 
         self.declare_partials('w_frac', 'flight_speed')
