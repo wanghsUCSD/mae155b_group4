@@ -54,7 +54,7 @@ prob = Problem()
 model = Group()
 
 comp = IndepVarComp()
-comp.add_output('sonic_speed', val=257.22)
+comp.add_output('speed', val=257.22)
 comp.add_output('rnge', val=1.3e6)
 comp.add_output('isp', val=10193) #dummy variable for now
 prob.model.add_subsystem('inputs_comp', comp, promotes=['*'])
