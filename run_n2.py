@@ -1,9 +1,11 @@
+from __future__ import absolute_import
 import numpy as np
 
 from openmdao.api import Problem, Group, IndepVarComp, ExecComp, ScipyOptimizeDriver
 from openaerostruct.geometry.utils import generate_mesh
 from components.oas_group import OASGroup
 from components.breguet_range.breguet_range_comp import BregRangeCo
+from components.zero_lift_drag.zero_lift_group import ZeroLiftGroup
 
 # Create a dictionary to store options about the mesh
 mesh_dict = {'num_y' : 11,
@@ -58,6 +60,9 @@ comp.add_output('speed', val=257.22)
 comp.add_output('rnge', val=1.3e6)
 comp.add_output('isp', val=10193) #dummy variable for now
 prob.model.add_subsystem('inputs_comp', comp, promotes=['*'])
+
+# comp = SWet()
+# prob.model.add_subsystem('wetted_area',comp, promotes=['*'])
 
 comp = BregRangeCo()
 prob.model.add_subsystem('breguet_range_comp', comp, promotes=['*'])
