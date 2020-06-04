@@ -1,12 +1,11 @@
 from distutils.core import setup
 
 
-
 setup(
-    name='components',
+    name='weight_component',
     version='1',
     packages=[
-        'components',
+        'weight_component',
     ],
     install_requires=[
     ],
