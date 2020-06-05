@@ -21,10 +21,10 @@ class SWet(ExplicitComponent):
         self.add_output('S_wet_f')
 
         # inputs for S_wet_wing
-        self.add_input('S_w') # Exposed wing area (without including fuselage)
-        self.add_input('taper') # chord tip / chord root
-        self.add_input('t_c') # thickness to chord ratio at root
-        self.add_input('t_c_ratio') # t/c of tip / t/c of root
+        self.add_input('S_w', val = 157.) # Exposed wing area (without including fuselage)
+        self.add_input('taper', val = .3) # chord tip / chord root
+        self.add_input('t_c', val = 0.14) # thickness to chord ratio at root
+        self.add_input('t_c_ratio', val = 1.) # t/c of tip / t/c of root
         self.add_output('S_wet_w')
 
         # declare partials for wetted areas
@@ -90,8 +90,8 @@ if __name__ == "__main__":
 
 
     prob.run_model()
-    prob.model.list_inputs()
-    prob.model.list_outputs()
+    prob.model.list_inputs(prom_name=True)
+    prob.model.list_outputs(prom_name=True)
   
 #  ..........................work in progress.........................................
 

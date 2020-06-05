@@ -4,9 +4,9 @@ from openmdao.api import ExplicitComponent, IndepVarComp, Group, Problem
 import openmdao.api as om
 from lsdo_utils.api import OptionsDictionary, LinearCombinationComp, PowerCombinationComp, GeneralOperationComp, ElementwiseMinComp
 
-from skin_friction_group import SkinFrictionGroup
-from s_wet import SWet
-from form_drag_co import FormDragCo
+from .s_wet import SWet
+from .skin_friction_group import SkinFrictionGroup
+from .form_drag_co import FormDragCo
 
 class ZeroLiftGroup(Group):
 
@@ -27,6 +27,7 @@ class ZeroLiftGroup(Group):
 
         form_drag_comp = FormDragCo()
         self.add_subsystem('form_drag_comp', form_drag_comp, promotes=['*'])
+        
 
         comp = PowerCombinationComp(
             shape=shape,
@@ -77,6 +78,9 @@ if __name__ == "__main__":
     )
     prob.model.add_subsystem('zero_lift_group', zero_lift_group)
     
+
     prob.setup(check=True)
     prob.run_model()
-    prob.model.list_outputs()
+    prob.model.list_inputs(prom_name=True)
+    prob.model.list_outputs(prom_name=True)
+    print(prob.model(''))

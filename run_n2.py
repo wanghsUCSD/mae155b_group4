@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 import numpy as np
 
 from openmdao.api import Problem, Group, IndepVarComp, ExecComp, ScipyOptimizeDriver
@@ -7,6 +6,8 @@ from components.oas_group import OASGroup
 from components.breguet_range.breguet_range_comp import BregRangeCo
 from components.zero_lift_drag.zero_lift_group import ZeroLiftGroup
 
+
+shape = (1,)
 # Create a dictionary to store options about the mesh
 mesh_dict = {'num_y' : 11,
              'num_x' : 5,
@@ -19,7 +20,29 @@ mesh, twist_cp = generate_mesh(mesh_dict)
 
 # Create a dictionary with info and options about the aerodynamic
 # lifting surface
-surface = {
+
+
+# Create the OpenMDAO problem
+prob = Problem()
+
+model = Group()
+
+comp = IndepVarComp()
+# comp.add_output('speed', val=257.22)
+comp.add_output('rnge', val=1.3e6)
+comp.add_output('isp', val=10193) #dummy variable for now
+prob.model.add_subsystem('inputs_comp', comp, promotes=['*'])
+
+comp = ZeroLiftGroup(
+    shape = shape
+)
+prob.model.add_subsystem('zero_lift_group',comp, promotes=['*'])
+
+
+comp = BregRangeCo()
+prob.model.add_subsystem('breguet_range_comp', comp, promotes=['*'])
+
+oas_group = OASGroup(surface = {
             # Wing definition
             'name' : 'wing',        # name of the surface
             'symmetry' : False,     # if true, model one half of wing
@@ -38,7 +61,7 @@ surface = {
             # the total CL and CD.
             # These CL0 and CD0 values do not vary wrt alpha.
             'CL0' : 0.2,            # CL of the surface at alpha=0
-            'CD0' : 0.024,            # CD of the surface at alpha=0
+            'CD0' : .02,            # CD of the surface at alpha=0
 
             # Airfoil properties for viscous drag calculation
             'k_lam' : 0.05,         # percentage of chord with laminar
@@ -48,26 +71,7 @@ surface = {
                                     # thickness
             'with_viscous' : True,  # if true, compute viscous drag
             'with_wave' : False,     # if true, compute wave drag
-            }
-
-# Create the OpenMDAO problem
-prob = Problem()
-
-model = Group()
-
-comp = IndepVarComp()
-comp.add_output('speed', val=257.22)
-comp.add_output('rnge', val=1.3e6)
-comp.add_output('isp', val=10193) #dummy variable for now
-prob.model.add_subsystem('inputs_comp', comp, promotes=['*'])
-
-# comp = SWet()
-# prob.model.add_subsystem('wetted_area',comp, promotes=['*'])
-
-comp = BregRangeCo()
-prob.model.add_subsystem('breguet_range_comp', comp, promotes=['*'])
-
-oas_group = OASGroup(surface=surface)
+            })
 prob.model.add_subsystem('oas_group', oas_group, promotes=['*'])
 
 comp = ExecComp('LD = CL/CD')
@@ -97,7 +101,7 @@ prob.setup()
 # exit()
 # prob.run_driver()
 prob.run_model()
-
+prob.model.list_inputs(prom_name=True)
 prob.model.list_outputs(prom_name=True)
 
 print(prob['aero_point_0.wing_perf.CD'][0])
@@ -108,4 +112,3 @@ print(prob['aero_point_0.CM'][1])
 
 print('w_frac', prob['w_frac'])
 print('LD', prob['LD'])
-

@@ -19,10 +19,10 @@ class SkinFrictionGroup(Group):
         mach_number = 0.85 
 
         comp = IndepVarComp()
-        comp.add_output('speed')
-        comp.add_output('characteristic_length')
-        comp.add_output('density')
-        comp.add_output('dynamic_viscosity')
+        comp.add_output('speed', val = 250.)
+        comp.add_output('characteristic_length', val = 5.)
+        comp.add_output('density', val = 1.225)
+        comp.add_output('dynamic_viscosity', val = 0.0017893145130960248)
         comp.add_output('mach_number')
         self.add_subsystem('inputs_comp', comp, promotes=['*'])
 
@@ -133,4 +133,4 @@ if __name__ == "__main__":
 
 
     prob.run_model()
-    prob.model.list_outputs()
+    prob.model.list_outputs(prom_name=True)
