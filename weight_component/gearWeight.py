@@ -11,9 +11,9 @@ class maingearWeightComp(ExplicitComponent):
         
     def setup(self):
         self.add_input('Wl')
-        self.add_output('Wmgear')
+        self.add_output('W_mgear')
 
-        self.declare_partials('Wmgear', 'Wl')
+        self.declare_partials('W_mgear', 'Wl')
 
     def compute(self, inputs, outputs):
         Nl = self.options['Nl']
@@ -21,7 +21,7 @@ class maingearWeightComp(ExplicitComponent):
         
         Wl = inputs['Wl']
 
-        outputs['Wmgear'] = 0.0106 * Wl ** 0.888 * Nl ** 0.25 * 90 ** 0.4 * 8 ** 0.321 * 2 ** -0.5 * Vstall ** 0.1
+        outputs['W_mgear'] = 0.0106 * Wl ** 0.888 * Nl ** 0.25 * 90 ** 0.4 * 8 ** 0.321 * 2 ** -0.5 * Vstall ** 0.1
 
     def compute_partials(self, inputs, partials):
         Nl = self.options['Nl']
@@ -29,7 +29,7 @@ class maingearWeightComp(ExplicitComponent):
 
         Wl = inputs['Wl']
 
-        partials['Wmgear', 'Wl'] = 0.0106 * 0.888 * Wl ** -0.112 * Nl ** 0.25 * 90 ** 0.4 * 8 ** 0.321 * 2 ** -0.5 * Vstall ** 0.1
+        partials['W_mgear', 'Wl'] = 0.0106 * 0.888 * Wl ** -0.112 * Nl ** 0.25 * 90 ** 0.4 * 8 ** 0.321 * 2 ** -0.5 * Vstall ** 0.1
 
 class nosegearWeightComp(ExplicitComponent):
 
@@ -38,22 +38,22 @@ class nosegearWeightComp(ExplicitComponent):
         
     def setup(self):
         self.add_input('Wl')
-        self.add_output('Wngear')
+        self.add_output('W_ngear')
 
-        self.declare_partials('Wngear', 'Wl')
+        self.declare_partials('W_ngear', 'Wl')
 
     def compute(self, inputs, outputs):
         Nl = self.options['Nl']
         
         Wl = inputs['Wl']
 
-        outputs['Wngear'] = 0.032 * Wl ** 0.646 * Nl ** 0.2 * 90 ** 0.5 * 2 ** 0.45
+        outputs['W_ngear'] = 0.032 * Wl ** 0.646 * Nl ** 0.2 * 90 ** 0.5 * 2 ** 0.45
 
     def compute_partials(self, inputs, partials):
         Nl = self.options['Nl']
         
         Wl = inputs['Wl']
 
-        partials['Wngear', 'Wl'] = 0.032 * 0.646 * Wl ** -0.354 * Nl ** 0.2 * 90 ** 0.5 * 2 ** 0.45
+        partials['W_ngear', 'Wl'] = 0.032 * 0.646 * Wl ** -0.354 * Nl ** 0.2 * 90 ** 0.5 * 2 ** 0.45
 
        
