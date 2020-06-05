@@ -1,6 +1,6 @@
 import unittest
 
-from s_wet import SWet
+from .s_wet import SWet
 
 from openmdao.api import Problem
 
