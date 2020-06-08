@@ -14,17 +14,16 @@ class SkinFrictionGroup(Group):
     def setup(self):
         shape = self.options['shape']
 
-        skin_friction_roughness = 1.27 * 10**-6 
-        laminar_pctg = 3
+        skin_friction_roughness = 0.4e-5 
+        laminar_pctg = 5
         mach_number = 0.85 
 
-        comp = IndepVarComp()
-        comp.add_output('speed', val = 250.)
-        comp.add_output('characteristic_length', val = 5.)
-        comp.add_output('density', val = 1.225)
-        comp.add_output('dynamic_viscosity', val = 0.0017893145130960248)
-        comp.add_output('mach_number')
-        self.add_subsystem('inputs_comp', comp, promotes=['*'])
+        # comp = IndepVarComp()
+        # comp.add_output('speed', val = 250.)
+        # comp.add_output('characteristic_length', val = 5.)
+        # comp.add_output('density', val = 1.225)
+        # comp.add_output('dynamic_viscosity', val = 0.0017893145130960248)
+        # self.add_subsystem('inputs_comp', comp, promotes=['*'])
 
         # creates component for calculating Re
         comp = PowerCombinationComp(
@@ -120,9 +119,6 @@ if __name__ == "__main__":
         shape = shape,
     )
     prob.model.add_subsystem('skin_friction_group', skin_friction_group)
-
-
-
 
     prob.setup(check=True)
     prob['skin_friction_group.speed'] = 250.
