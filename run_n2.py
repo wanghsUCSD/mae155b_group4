@@ -38,11 +38,12 @@ comp = ZeroLiftGroup(
 )
 prob.model.add_subsystem('zero_lift_group',comp, promotes=['*'])
 
+CD0 = 'C0'
 
 comp = BregRangeCo()
 prob.model.add_subsystem('breguet_range_comp', comp, promotes=['*'])
 
-oas_group = OASGroup(surface = {
+surface = {
             # Wing definition
             'name' : 'wing',        # name of the surface
             'symmetry' : False,     # if true, model one half of wing
@@ -61,7 +62,7 @@ oas_group = OASGroup(surface = {
             # the total CL and CD.
             # These CL0 and CD0 values do not vary wrt alpha.
             'CL0' : 0.2,            # CL of the surface at alpha=0
-            'CD0' : .02,            # CD of the surface at alpha=0
+            'CD0' : .013,            # CD of the surface at alpha=0
 
             # Airfoil properties for viscous drag calculation
             'k_lam' : 0.05,         # percentage of chord with laminar
@@ -71,7 +72,9 @@ oas_group = OASGroup(surface = {
                                     # thickness
             'with_viscous' : True,  # if true, compute viscous drag
             'with_wave' : False,     # if true, compute wave drag
-            })
+            }
+
+oas_group = OASGroup(surface=surface)
 prob.model.add_subsystem('oas_group', oas_group, promotes=['*'])
 
 comp = ExecComp('LD = CL/CD')
