@@ -1,9 +1,9 @@
 from __future__ import division
 import numpy as np
 
-from lsdo_aircraft.atmosphere.constants import epsilon, h_trans
-from lsdo_aircraft.atmosphere.constants import T0, T1, L, R
-from lsdo_aircraft.atmosphere.constants import p0, p1, g, gamma
+from constants import epsilon, h_trans
+from constants import T0, T1, L, R
+from constants import p0, p1, g, gamma
 
 
 g_L_R = g / L / R
