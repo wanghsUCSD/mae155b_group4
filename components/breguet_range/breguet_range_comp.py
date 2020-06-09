@@ -15,13 +15,13 @@ class BregRangeCo(ExplicitComponent):
         self.add_input('rnge')
         self.add_input('isp') 
         self.add_input('W0')
-        self.add_output('w_frac')
+        self.add_output('W_f')
 
-        self.declare_partials('w_frac', 'speed')
-        self.declare_partials('w_frac', 'LD')
-        self.declare_partials('w_frac', 'rnge')
-        self.declare_partials('w_frac', 'W0')
-        self.declare_partials('w_frac', 'isp')
+        self.declare_partials('W_f', 'speed')
+        self.declare_partials('W_f', 'LD')
+        self.declare_partials('W_f', 'rnge')
+        self.declare_partials('W_f', 'W0')
+        self.declare_partials('W_f', 'isp')
 
     def compute(self, inputs, outputs):
 
@@ -31,7 +31,7 @@ class BregRangeCo(ExplicitComponent):
         isp = inputs['isp']
         W0 = inputs['W0']
 
-        outputs['w_frac'] = W0 / (np.exp(rnge / (speed * LD * isp)))
+        outputs['W_f'] = W0 / (np.exp(rnge / (speed * LD * isp)))
 
     def compute_partials(self, inputs, partials):
         speed = inputs['speed']
@@ -40,10 +40,10 @@ class BregRangeCo(ExplicitComponent):
         isp = inputs['isp']
         W0 = inputs['W0']
 
-        partials['w_frac', 'speed'] = (rnge*W0*np.exp(-1*rnge/(LD*speed*isp)))/(LD*(speed**2)*isp)
-        partials['w_frac', 'LD'] = (rnge * W0 * np.exp(-1*rnge/(speed*LD*isp))) / speed * (LD**2) * isp
-        partials['w_frac', 'rnge'] = (-1 * W0 * np.exp(-1*rnge/(LD*speed*isp))) / (LD * speed * isp)
-        partials['w_frac', 'isp'] = (rnge * W0 * np.exp(-1*rnge/(LD*speed*isp))) / LD * speed * (isp**2)
-        partials['w_frac', 'W0'] = 1 / ( np.exp(rnge/(speed * LD * isp)))
+        partials['W_f', 'speed'] = (rnge*W0*np.exp(-1*rnge/(LD*speed*isp)))/(LD*(speed**2)*isp)
+        partials['W_f', 'LD'] = (rnge * W0 * np.exp(-1*rnge/(speed*LD*isp))) / speed * (LD**2) * isp
+        partials['W_f', 'rnge'] = (-1 * W0 * np.exp(-1*rnge/(LD*speed*isp))) / (LD * speed * isp)
+        partials['W_f', 'isp'] = (rnge * W0 * np.exp(-1*rnge/(LD*speed*isp))) / LD * speed * (isp**2)
+        partials['W_f', 'W0'] = 1 / ( np.exp(rnge/(speed * LD * isp)))
 
 
