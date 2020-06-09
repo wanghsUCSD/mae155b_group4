@@ -12,11 +12,13 @@ class liftComp(ExplicitComponent):
         self.add_input('speed')
         self.add_input('density')
         self.add_input('Cl')
+        self.add_input('S_w')
         self.add_output('lift')
 
         self.declare_partials('lift', 'speed')
         self.declare_partials('lift', 'density')
         self.declare_partials('lift', 'Cl')
+        self.declare_partials('lift', 'S_w')
 
     def compute(self, inputs, outputs):
         # Cl = self.options['Cl']
@@ -24,7 +26,8 @@ class liftComp(ExplicitComponent):
         speed = inputs['speed']
         density = inputs['density']
         Cl = inputs['Cl']
-        outputs['lift'] = Cl * 0.5 * speed ** 2 * density * 50
+        S_w = inputs['S_w']
+        outputs['lift'] = Cl * 0.5 * speed ** 2 * density * S_w
 
     def compute_partials(self, inputs, partials):
         # Cl = self.options['Cl']
@@ -32,7 +35,9 @@ class liftComp(ExplicitComponent):
         speed = inputs['speed']
         density = inputs['density']
         Cl = inputs['Cl']
+        S_w = inputs['S_w']
 
-        partials['lift', 'speed'] = 50 * Cl * density * speed
-        partials['lift', 'density'] = 50 * Cl * 0.5 * speed ** 2
-        partials['lift', 'Cl'] = 50 * 0.5 * speed ** 2
+        partials['lift', 'speed'] = Cl * density * speed * S_w
+        partials['lift', 'density'] = Cl * 0.5 * speed ** 2 * S_w
+        partials['lift', 'Cl'] = density * 0.5 * speed ** 2 * S_w
+        partials['lift', 'S_w'] = Cl * density * 0.5 * speed ** 2

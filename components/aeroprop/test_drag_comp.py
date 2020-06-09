@@ -1,18 +1,18 @@
 import unittest
 
-from lift_comp import liftComp
+from .drag_comp import dragComp
 
 from openmdao.api import Problem
 
 from openmdao.utils.assert_utils import assert_check_partials
 
-#  test for lift_comp
+#  test for drag_comp
 
-class testLift(unittest.TestCase):
+class testDrag(unittest.TestCase):
 
     def test_component_and_derivatives(self):
         prob = Problem()
-        prob.model = liftComp()
+        prob.model = dragComp()
         prob.setup()
         prob.run_model()
 

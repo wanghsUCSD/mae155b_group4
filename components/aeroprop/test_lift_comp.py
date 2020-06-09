@@ -1,18 +1,18 @@
 import unittest
 
-from thrust_comp import thrustComp
+from .lift_comp import liftComp
 
 from openmdao.api import Problem
 
 from openmdao.utils.assert_utils import assert_check_partials
 
-#  test for thrust_comp
+#  test for lift_comp
 
-class testThrust(unittest.TestCase):
+class testLift(unittest.TestCase):
 
     def test_component_and_derivatives(self):
         prob = Problem()
-        prob.model = thrustComp()
+        prob.model = liftComp()
         prob.setup()
         prob.run_model()
 
