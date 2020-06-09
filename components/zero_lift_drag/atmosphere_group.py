@@ -47,13 +47,13 @@ class AtmosphereGroup(Group):
 
         comp = PowerCombinationComp(
             shape=shape,
-            out_name='mach_number',
+            out_name='Mach_number',
             powers_dict=dict(
                 speed=1.,
                 sonic_speed=-1.,
             ),
         )
-        self.add_subsystem('mach_number_comp', comp, promotes=['*'])
+        self.add_subsystem('Mach_number_comp', comp, promotes=['*'])
 
         comp = PowerCombinationComp(
             shape=shape,
