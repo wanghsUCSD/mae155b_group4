@@ -6,7 +6,6 @@ from openmdao.api import ExplicitComponent
 # The final form of the breguet range equation
 # NEEDED COMPONENT INPUTS: L/D
 
-
 class BregRangeCo(ExplicitComponent):
 
     def setup(self):
