@@ -3,7 +3,7 @@ import numpy as np
 
 from lsdo_utils.api import ArrayExplicitComponent
 
-from lsdo_aircraft.atmosphere.constants import mu2, T2, Ts
+from constants import mu2, T2, Ts
 
 
 class ViscosityComp(ArrayExplicitComponent):

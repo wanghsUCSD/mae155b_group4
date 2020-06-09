@@ -3,7 +3,7 @@ import numpy as np
 
 from lsdo_utils.api import ArrayExplicitComponent
 
-from lsdo_aircraft.atmosphere.constants import R
+from constants import R
 
 
 class DensityComp(ArrayExplicitComponent):

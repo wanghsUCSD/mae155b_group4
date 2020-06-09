@@ -2,7 +2,7 @@ import numpy as np
 
 from lsdo_utils.api import OptionsDictionary
 
-from lsdo_aircraft.atmosphere.atmosphere_group import AtmosphereGroup
+from atmosphere_group import AtmosphereGroup
 
 
 class Atmosphere(OptionsDictionary):

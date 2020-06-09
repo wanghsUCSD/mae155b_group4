@@ -3,7 +3,7 @@ import numpy as np
 
 from lsdo_utils.api import ArrayExplicitComponent
 
-from lsdo_aircraft.atmosphere.utils import \
+from utils import \
     get_mask_arrays, compute_temps, compute_temp_derivs
 
 
