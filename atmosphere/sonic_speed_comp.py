@@ -3,7 +3,7 @@ import numpy as np
 
 from lsdo_utils.api import ArrayExplicitComponent
 
-from lsdo_aircraft.atmosphere.constants import gamma, R
+from constants import gamma, R
 
 
 class SonicSpeedComp(ArrayExplicitComponent):

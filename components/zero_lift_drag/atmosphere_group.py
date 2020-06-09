@@ -1,28 +1,24 @@
 from __future__ import print_function
 import numpy as np
-from openmdao.api import Group, IndepVarComp
+from openmdao.api import Group, IndepVarComp, Problem
 
 from lsdo_utils.api import PowerCombinationComp
 
-from temperature_comp import TemperatureComp
-from pressure_comp import PressureComp
-from density_comp import DensityComp
-from sonic_speed_comp import SonicSpeedComp
-from viscosity_comp import ViscosityComp
-
+from lsdo_aircraft.atmosphere.temperature_comp import TemperatureComp
+from lsdo_aircraft.atmosphere.pressure_comp import PressureComp
+from lsdo_aircraft.atmosphere.density_comp import DensityComp
+from lsdo_aircraft.atmosphere.sonic_speed_comp import SonicSpeedComp
+from lsdo_aircraft.atmosphere.viscosity_comp import ViscosityComp
 
 class AtmosphereGroup(Group):
 
     def initialize(self):
         self.options.declare('shape', types=tuple)
-        self.options.declare('options_dictionary')
-
-        self.promotes = None
 
     def setup(self):
         shape = self.options['shape']
 
-        size = int(np.prod(shape))
+
 
         group = Group()
 
@@ -69,3 +65,23 @@ class AtmosphereGroup(Group):
             ),
         )
         self.add_subsystem('dynamic_pressure_comp', comp, promotes=['*'])
+
+# runs a test to see if calculated values make sense
+if __name__ == "__main__":
+    
+    shape = (1,)
+
+    prob = Problem()
+
+    atmosphere_group = AtmosphereGroup(
+        shape = shape,
+    )
+    prob.model.add_subsystem('atmosphere_group', atmosphere_group)
+
+    prob.setup(check=True)
+
+    prob['atmosphere_group.altitude'] = 12000
+
+    prob.run_model()
+    prob.model.list_inputs(prom_name=True)
+    prob.model.list_outputs(prom_name=True)
