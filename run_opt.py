@@ -1,6 +1,7 @@
 import numpy as np
 
 from openmdao.api import Problem, Group, IndepVarComp, ExecComp, ScipyOptimizeDriver
+from lsdo_utils.api import PowerCombinationComp, LinearPowerCombinationComp
 from openaerostruct.geometry.utils import generate_mesh
 from components.oas_group import OASGroup
 from components.breguet_range.breguet_range_comp import BregRangeCo
@@ -9,6 +10,8 @@ from components.aeroprop.thrust_comp import thrustComp
 from components.aeroprop.drag_comp import dragComp
 from components.aeroprop.lift_comp import liftComp
 from weight_component.weightGroup import weightCompGroup
+from components.zero_lift_drag.atmosphere_group import AtmosphereGroup
+from lsdo_viz.api import Problem
 
 shape = (1,)
 # Create a dictionary to store options about the mesh
@@ -33,43 +36,29 @@ comp = IndepVarComp()
 # comp.add_output('speed', val=257.22)
 comp.add_output('rnge', val=1.3e6)
 comp.add_output('isp', val=10193) #dummy variable for now
+comp.add_output('altitude', val = 10000) # in meters
+comp.add_output('characteristic_length', val = 5)
+# comp.add_output('S_w', val = 157)
+# wing parameters
+comp.add_output('span', val = 59)
+comp.add_output('aspect_ratio', val = 9)
+comp.add_output('dihedral', val = 3, units='deg')
 
-comp.add_output('BPR', val = 5) # Bypass ratio
-comp.add_output('max_thrust', val = 490)
+# comp.add_output('BPR', val = 5) # Bypass ratio
+# comp.add_output('max_thrust', val = 490)
 
-# Define flight variables as independent variables of the model
-# comp.add_output('v', val=248.136, units='m/s') # Freestream Velocity
-# comp.add_output('alpha', val=5., units='deg') # Angle of Attack
-# comp.add_output('beta', val=0., units='deg') # Sideslip angle
-# comp.add_output('omega', val=np.zeros(3), units='deg/s') # Rotation rate
-# comp.add_output('Mach_number', val=0.85) # Freestream Mach number
-# comp.add_output('re', val=1.e6, units='1/m') # Freestream Reynolds number
-# comp.add_output('rho', val=0.38, units='kg/m**3') # Freestream air density
-# comp.add_output('cg', val=np.zeros((3)), units='m') # Aircraft center of gravity
 # Add vars to model, promoting is a quick way of automatically connecting inputs
 # and outputs of different OpenMDAO components
-
 prob.model.add_subsystem('flight_vars', comp, promotes=['*'])
 
-comp = ZeroLiftGroup(
-    shape = shape
-)
-prob.model.add_subsystem('zero_lift_group',comp, promotes=['*'])
+comp = ExecComp('S_w = span**2 / aspect_ratio')
+prob.model.add_subsystem('wing_area_comp', comp, promotes=['*'])
 
-comp = weightCompGroup()
-prob.model.add_subsystem('weight_group', comp, promotes=['*'])
+comp = ExecComp('chord = S_w / span')
+prob.model.add_subsystem('chord_length_comp', comp, promotes=['*'])
 
-comp = BregRangeCo() 
-prob.model.add_subsystem('breguet_range_comp', comp, promotes=['*'])
-
-comp = dragComp() # this component computes drag from CD found in OpenAeroStruct
-prob.model.add_subsystem('drag_comp', comp, promotes=['*'])
-
-comp = liftComp() # this component computes lift from CL found in OpenAeroStruct
-prob.model.add_subsystem('lift_comp', comp, promotes=['*'])
-
-comp = thrustComp() 
-prob.model.add_subsystem('thrust_comp', comp, promotes=['*'])
+atmosphere_group = AtmosphereGroup(shape = shape,)
+prob.model.add_subsystem('atmosphere_group', atmosphere_group, promotes=['*'])
 
 surface = {
             # Wing definition
@@ -95,7 +84,7 @@ surface = {
             # Airfoil properties for viscous drag calculation
             'k_lam' : 0.05,         # percentage of chord with laminar
                                     # flow, used for viscous drag
-            't_over_c_cp' : np.array([0.14]),      # thickness over chord ratio (NACA0015)
+            't_over_c_cp' : np.array([0.14]),      # thickness over chord ratio (NACA0014)
             'c_max_t' : .303,       # chordwise location of maximum (NACA0015)
                                     # thickness
             'with_viscous' : True,  # if true, compute viscous drag
@@ -105,77 +94,90 @@ surface = {
 oas_group = OASGroup(surface=surface)
 prob.model.add_subsystem('oas_group', oas_group, promotes=['*'])
 
+comp = weightCompGroup()
+prob.model.add_subsystem('weight_group', comp, promotes=['*'])
+
+comp = BregRangeCo() 
+prob.model.add_subsystem('breguet_range_comp', comp, promotes=['*'])
+
+# comp = dragComp() # this component computes drag from CD found in OpenAeroStruct
+# prob.model.add_subsystem('drag_comp', comp, promotes=['*'])
+
+# comp = liftComp() # this component computes lift from CL found in OpenAeroStruct
+# prob.model.add_subsystem('lift_comp', comp, promotes=['*'])
+
+# comp = thrustComp() 
+# prob.model.add_subsystem('thrust_comp', comp, promotes=['*'])
+
 # Computes E = L/D for use in the breguet range component
 comp = ExecComp('LD = CL/CD')
 prob.model.add_subsystem('ld_comp', comp, promotes=['*'])
 
-comp = ExecComp('TOD = thrust / drag ')
-prob.model.add_subsystem('TOD', comp, promotes=['*'])
+# comp = ExecComp('TOD = thrust - drag ')
+# prob.model.add_subsystem('TOD', comp, promotes=['*'])
 
-comp = ExecComp('LOW = lift / emptyTotal*9.81')
+comp = LinearPowerCombinationComp(
+    shape=shape,
+    out_name = 'LOW',
+    terms_list=[
+        (1.0, dict(
+            L = 1.,  
+        )),
+        (-9.81, dict(
+            emptyTotal = 1,
+        )),
+    ],
+)
 prob.model.add_subsystem('LOW', comp, promotes=['*'])
 
 
 prob.model.connect('aero_point_0.CL', 'CL')
 prob.model.connect('aero_point_0.CD', 'CD')
+prob.model.connect('aero_point_0.wing_perf.L', 'L')
+prob.model.connect('dihedral', 'wing.mesh.dihedral.dihedral')
+# prob.model.connect('chord', 'wing.mesh.scale_x.chord'[0])
+
 
 # Import the Scipy Optimizer and set the driver of the problem to use
 # it, which defaults to an SLSQP optimization method
-# prob.driver = om.ScipyOptimizeDriver()
-
 
 # # recorder = om.SqliteRecorder("aero.db")
 # # prob.driver.add_recorder(recorder)
 # # prob.driver.recording_options['record_derivatives'] = True
 # # prob.driver.recording_options['includes'] = ['*']
 
-# Set optimizer as model driver
+# # Set optimizer as model driver
 prob.driver = ScipyOptimizeDriver()
+prob.driver.options['optimizer'] = 'COBYLA'
 prob.driver.options['tol'] = 1e-9
 prob.driver.options['debug_print'] = ['nl_cons','objs', 'desvars']
 
-# Setup problem and add design variables, constraint, and objective
-prob.model.add_design_var('alpha', lower=0, upper = 5)
-prob.model.add_design_var('altitude', lower=9000, upper = 14000)
-# Constraints
+# # Setup problem and add design variables, constraint, and objective
+prob.model.add_design_var('alpha', lower=-5, upper = 15)
+prob.model.add_design_var('altitude_km', lower=10, upper = 15)
+# # Constraints
 
-# prob.model.add_constraint('aero_point_0.CL', equals = 0.7)
-# prob.model.add_constraint('TOD', equals = 1)
-prob.model.add_constraint('LOW', equals = 1)
+# # prob.model.add_constraint('aero_point_0.CL', equals = 0.7)
+# # prob.model.add_constraint('TOD', equals = 0)
+prob.model.add_constraint('LOW', lower=-1e-3, upper=1e-3, scaler=1e-6)
 
-# Objective
+# # Objective
 
-prob.model.add_objective('w_frac', scaler=-1)
+prob.model.add_objective('W_f', scaler=-1)
 
-
-
-# prob.model.add_design_var('altitude', lower=10000, upper=13000)
-# prob.model.add_design_var('Mach_number', lower=0.75, upper=0.85)
-
-# prob.model.add_constraint('LD', equals=18.)
-# # prob.model.add_constraint(point_name + '.wing.S_ref', equals=10.0)
-# prob.model.add_objective('aero_point_0.CD', scaler=1e4)
 
 # Set up and run the optimization problem
 prob.setup()
 
 # prob.check_partials(compact_print=True)
 # exit()
-prob.run_driver()
 
-# Run optimization
-# prob.run_driver()
+
+# # # Run optimization
+
+prob.run_driver()
 
 # prob.run_model()
 
 # prob.model.list_inputs(prom_name=True)
 # prob.model.list_outputs(prom_name=True)
-
-# print(prob['aero_point_0.wing_perf.CD'][0])
-
-# print(prob['aero_point_0.wing_perf.CL'][0])
-
-# print(prob['aero_point_0.CM'][1])
-
-# print('w_frac', prob['w_frac'])
-# print('LD', prob['LD'])
