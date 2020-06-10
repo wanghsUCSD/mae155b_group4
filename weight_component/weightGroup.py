@@ -23,7 +23,7 @@ class weightCompGroup(Group):
         comp.add_output('S_vt',val=300)
         comp.add_output('W_furnish',val=8900)
         comp.add_output('W_engine',val=32000)
-        comp.add_design_var('W0', lower=150000)
+        comp.add_design_var('W_empty', lower=90000)
         self.add_subsystem('inputs_comp', comp, promotes=['*'])
         
         comp = wingWeightComp(N=3.5,tc=0.3,AR=9.,sweep=30.,taper = 0.3)
@@ -50,6 +50,6 @@ class weightCompGroup(Group):
         comp = hydraulicWeightComp()
         self.add_subsystem('hydraulicWeight',comp,promotes=['*'])
 
-        comp = ExecComp('emptyTotal = W_wing + W_ht + vtailWeight + W_fuse + W_mgear + W_ngear + W_aircon + W_hydraulic + W_furnish + W_engine')
+        comp = ExecComp('W_empty = W_wing + W_ht + vtailWeight + W_fuse + W_mgear + W_ngear + W_aircon + W_hydraulic + W_furnish + W_engine')
         self.add_subsystem('emptyWeight',comp,promotes=['*'])
         
