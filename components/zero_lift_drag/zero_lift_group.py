@@ -20,7 +20,7 @@ class ZeroLiftGroup(Group):
         comp.add_output('speed', val = 250.)
         comp.add_output('t_c', val = .13)
         comp.add_output('sweep', val = 22.5 * np.pi/180)
-        # comp.add_output('mach_number', val = 0.85)
+        # comp.add_output('Mach_number', val = 0.85)
 
         comp.add_output('S_w', val = 157. )
         comp.add_output('S_f', val = 2000. )
@@ -35,7 +35,6 @@ class ZeroLiftGroup(Group):
         atmosphere_group = AtmosphereGroup(
             shape = shape,
         )
-
         self.add_subsystem('atmosphere_group', atmosphere_group, promotes=['*'])
         
 
@@ -80,11 +79,11 @@ class ZeroLiftGroup(Group):
         comp = LinearCombinationComp(
             shape = shape,
             in_names = ['C0_wing','C0_fuselage'],
-            out_name = 'C0',
+            out_name = 'CD0',
             coeffs = [1.,1.],
 
         )
-        self.add_subsystem('C0', comp, promotes=['*'])
+        self.add_subsystem('CD0', comp, promotes=['*'])
         
         
 # runs a test to see if calculated values make sense
